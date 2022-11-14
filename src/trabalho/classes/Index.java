@@ -16,10 +16,8 @@ public class Index {
                 check = true;
             }
             if(check) {
-                raf.seek(12*(long)key)
+                raf.seek(12*(long)key);
             }
-
-
             raf.seek(raf.length());
             raf.writeInt(id);
             raf.writeLong(pos);
