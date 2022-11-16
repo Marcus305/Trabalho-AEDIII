@@ -5,10 +5,10 @@ import java.util.Scanner;
 
 //Classe para manipular as contas de maneira indexada
 public class Banco {
-    private String[] users;
-    private int lastId = -1;
+    //private String[] users;
+    //private int lastId = -1;
 
-    public String[] getUsers() {
+    /*public String[] getUsers() {
         return users;
     }
 
@@ -29,25 +29,34 @@ public class Banco {
             temp[0] = user;
             this.setUsers(temp);
         }
-    }
+    }*/
 
-    public int getLastId() {
+    /*public int getLastId() {
         return lastId;
-    }
+    }*/
 
-    public void setLastId(int lastId) {
+    /*public void setLastId(int lastId) {
         this.lastId = lastId;
-    }
+    }*/
 
     public int gerarId() {
-        if (this.lastId == -1) {
-            return 1;
-        } else {
-            return this.lastId + 1;
+        int lastId=-3;
+        try(RandomAccessFile raf = new RandomAccessFile("C:\\Users\\marcu\\IdeaProjects\\AEDIII_Trabalho\\src\\trabalho\\output\\output0.txt", "r")) {
+            try {
+                lastId = raf.readInt();
+            } catch (Exception e) {
+                lastId = -1;
+            }
+            if (lastId == -1) {
+                return 1;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+        return lastId+1;
     }
 
-    public void loadUsers() {
+    /*public void loadUsers() {
         try(RandomAccessFile dis = new RandomAccessFile("C:\\Users\\marcu\\IdeaProjects\\AEDIII_Trabalho\\src\\trabalho\\output\\output0.txt", "r")) {
             int lastid = dis.readInt();
             this.setLastId(lastid);
@@ -69,24 +78,32 @@ public class Banco {
             //System.out.println(e);
             return;
         }
-    }
+    }*/
 
 
     //Verifica se já possui um determinado nome de usuário no banco
     public boolean checkUser(String test) {
-        if (this.getUsers() != null) {
-            for (int i = 0; i < this.getUsers().length; i++) {
-                if (this.getUsers()[i].equals(test)) {
-                    return true;
+        try(RandomAccessFile raf = new RandomAccessFile("C:\\Users\\marcu\\IdeaProjects\\AEDIII_Trabalho\\src\\trabalho\\output\\output0.txt", "r")) {
+            raf.readInt(); //last id
+            do {
+                byte lapide = raf.readByte();
+                int tam = raf.readInt();
+                byte[] bytes = new byte[tam];
+                raf.read(bytes);
+                if (lapide != 1) {
+                    Conta c = new Conta(bytes);
+                    if (test.equals(c.getNomeUsuario()))
+                        return true;
                 }
-            }
+            } while (raf.getFilePointer() != raf.length());
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return false;
     }
 
     public Conta criarConta() throws IOException {
         Conta conta = new Conta(this.gerarId());
-        this.setLastId(conta.getIdConta());
         Scanner sc = new Scanner(System.in);
         System.out.println("Informe o seu nome:");
         conta.setNomePessoa(sc.nextLine());
@@ -316,10 +333,10 @@ public class Banco {
     }
 
     //Salva utilizando random accessfile para uma única contra no final do arquivo
-    public void salvarRandom(Conta c) {
+    public void salvarRandom(Conta c, int id) {
         try {
             RandomAccessFile raf = new RandomAccessFile("C:\\Users\\marcu\\IdeaProjects\\AEDIII_Trabalho\\src\\trabalho\\output\\output0.txt", "rw");
-            raf.writeInt(this.getLastId());
+            raf.writeInt(id);
             raf.seek(raf.length());
             byte[] ba;
             ba = c.toByteArray();
@@ -332,11 +349,8 @@ public class Banco {
     }
 
     //pesquisa sequencial de registros
-    public void pesquisarReg() {
+    public void pesquisarReg(String user) {
         try(RandomAccessFile raf = new RandomAccessFile("C:\\Users\\marcu\\IdeaProjects\\AEDIII_Trabalho\\src\\trabalho\\output\\output0.txt", "r")) {
-            Scanner sc = new Scanner(System.in);
-            System.out.println("Digite um nome de usuário para pesquisar:");
-            String user = sc.nextLine();
             boolean check = false;
             raf.readInt(); //last id
             do {
@@ -527,7 +541,7 @@ public class Banco {
         }
     }
 
-    public void teste() {
+    /*public void teste() {
         Index ind = new Index();
         ind.create(1, 4);
         ind.create(2, 88);
@@ -551,5 +565,5 @@ public class Banco {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
+    }*/
 }

@@ -3,24 +3,44 @@ package trabalho.classes;
 import java.io.RandomAccessFile;
 
 public class Index {
-    private int max = 101;
+    private int max = 11;
 
     public void create(int id, long pos) {
-        try(RandomAccessFile raf = new RandomAccessFile("C:\\Users\\marcu\\IdeaProjects\\AEDIII_Trabalho\\src\\trabalho\\output\\index0.txt", "rw")) {
-            int key = hash(id);
-            boolean check = false;
-            raf.seek(12*(long)key);
-            try{
-                raf.readInt();
+        try(RandomAccessFile raf = new RandomAccessFile("C:\\Users\\marcu\\IdeaProjects\\AEDIII_Trabalho\\Trabalho-AEDIII\\src\\trabalho\\output\\index0.txt", "rw")) {
+            int hash = this.hash(id);
+            int key = hash*20;
+            raf.seek(key);
+            int idLido;
+            try {
+                idLido = raf.readInt();
             } catch(Exception e) {
-                check = true;
+                idLido = 0;
             }
-            if(check) {
-                raf.seek(12*(long)key);
+            if(idLido == 0) {
+                raf.seek(key);
+                raf.writeInt(id);
+                raf.writeLong(pos);
+                raf.writeLong(-1);
+            } else {
+                boolean check = false;
+                raf.seek(key);
+                while(!check) {
+                    raf.seek(raf.getFilePointer()+12);
+                    long posProx = raf.getFilePointer();
+                    long prox = raf.readLong();
+                    if(prox == -1) {
+                        raf.seek(posProx);
+                        raf.writeLong((long)id*20);
+                        raf.seek((long)id*20);
+                        raf.writeInt(id);
+                        raf.writeLong(pos);
+                        raf.writeLong(-1);
+                        check = true;
+                    } else {
+                        raf.seek(prox);
+                    }
+                }
             }
-            raf.seek(raf.length());
-            raf.writeInt(id);
-            raf.writeLong(pos);
         } catch(Exception e) {
             e.printStackTrace();
         }
@@ -30,17 +50,90 @@ public class Index {
         return id%this.max;
     }
 
-    public long find(int id) {
-        int key = hash(id);
-        long pos = 0;
-        try(RandomAccessFile raf = new RandomAccessFile("C:\\Users\\marcu\\IdeaProjects\\AEDIII_Trabalho\\src\\trabalho\\output\\index0.txt", "rw")) {
-            raf.seek(raf.getFilePointer());
-            raf.seek(12*(long)key);
-            raf.readInt();
-            pos = raf.readLong();
+    public long read(int id) {
+        try(RandomAccessFile raf = new RandomAccessFile("C:\\Users\\marcu\\IdeaProjects\\AEDIII_Trabalho\\Trabalho-AEDIII\\src\\trabalho\\output\\index0.txt", "r")) {
+            int hash = this.hash(id);
+            int key = hash*20;
+            raf.seek(key);
+            int idLido;
+            try {
+                idLido = raf.readInt();
+            } catch(Exception e) {
+                idLido = 0;
+            }
+            if(idLido == 0) {
+                return -1;
+            } else {
+                boolean check = false;
+                raf.seek(key);
+                while(!check) {
+                    idLido = raf.readInt();
+                    if(idLido == id) {
+                        return raf.readLong();
+                    } else {
+                        raf.seek(raf.getFilePointer()+8);
+                        long pos = raf.readLong();
+                        if(pos == -1) {
+                            return -1;
+                        } else {
+                            raf.seek(pos);
+                        }
+                    }
+                }
+            }
         } catch(Exception e) {
             e.printStackTrace();
         }
-        return pos;
+        return -2;
     }
+
+    public void update(int id, long change) {
+        try(RandomAccessFile raf = new RandomAccessFile("C:\\Users\\marcu\\IdeaProjects\\AEDIII_Trabalho\\Trabalho-AEDIII\\src\\trabalho\\output\\index0.txt", "rw")) {
+            int hash = this.hash(id);
+            int key = hash*20;
+            raf.seek(key);
+            int idLido;
+            try {
+                idLido = raf.readInt();
+            } catch(Exception e) {
+                idLido = 0;
+            }
+            if(idLido == 0) {
+                System.out.println("Este id não existe!");
+            } else {
+                boolean check = false;
+                raf.seek(key);
+                while(!check) {
+                    idLido = raf.readInt();
+                    if(idLido == id) {
+                        raf.writeLong(change);
+                        check = true;
+                    } else {
+                        raf.seek(raf.getFilePointer()+8);
+                        long pos = raf.readLong();
+                        if(pos != -1) {
+                            raf.seek(pos);
+                        } else {
+                            System.out.println("Erro de index");
+                        }
+                    }
+                }
+            }
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void imprimir() {
+        try(RandomAccessFile raf = new RandomAccessFile("C:\\Users\\marcu\\IdeaProjects\\AEDIII_Trabalho\\Trabalho-AEDIII\\src\\trabalho\\output\\index0.txt", "r")) {
+            System.out.println("Posição Hash    |    Id    |    Pos    |    Prox");
+            for(int i=0; raf.getFilePointer() != raf.length(); i++) {
+                int key = i*20;
+                System.out.println(key+"    |    "+raf.readInt()+"    |    "+raf.readLong()+"    |    "+raf.readLong());
+            }
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 }
