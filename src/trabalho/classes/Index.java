@@ -3,7 +3,6 @@ package trabalho.classes;
 import java.io.RandomAccessFile;
 
 public class Index {
-    private int max = 11;
 
     public void create(int id, long pos) {
         try(RandomAccessFile raf = new RandomAccessFile("C:\\Users\\marcu\\IdeaProjects\\AEDIII_Trabalho\\Trabalho-AEDIII\\src\\trabalho\\output\\index0.txt", "rw")) {
@@ -47,7 +46,8 @@ public class Index {
     }
 
     public int hash(int id) {
-        return id%this.max;
+        int max = 11;
+        return id% max;
     }
 
     public long read(int id) {
@@ -126,7 +126,7 @@ public class Index {
 
     public void imprimir() {
         try(RandomAccessFile raf = new RandomAccessFile("C:\\Users\\marcu\\IdeaProjects\\AEDIII_Trabalho\\Trabalho-AEDIII\\src\\trabalho\\output\\index0.txt", "r")) {
-            System.out.println("Posição Hash    |    Id    |    Pos    |    Prox");
+            System.out.println("PH    |    Id    |    Pos    |    Prox");
             for(int i=0; raf.getFilePointer() != raf.length(); i++) {
                 int key = i*20;
                 System.out.println(key+"    |    "+raf.readInt()+"    |    "+raf.readLong()+"    |    "+raf.readLong());

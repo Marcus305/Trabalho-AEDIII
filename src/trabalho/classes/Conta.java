@@ -17,20 +17,6 @@ public class Conta {
         this.idConta = idConta;
     }
 
-    public Conta() {
-    }
-
-    public Conta(int idConta, String nomePessoa, String[] email, String nomeUsuario, String senha, String cpf, String cidade, float saldoConta) {
-        this.idConta = idConta;
-        this.nomePessoa = nomePessoa;
-        this.email = email;
-        this.nomeUsuario = nomeUsuario;
-        this.senha = senha;
-        this.cpf = cpf;
-        this.cidade = cidade;
-        this.saldoConta = saldoConta;
-    }
-
     public Conta(byte[] ba) throws IOException {
         ByteArrayInputStream bais = new ByteArrayInputStream(ba);
         DataInputStream dis = new DataInputStream(bais);
