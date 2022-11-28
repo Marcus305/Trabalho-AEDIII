@@ -1,3 +1,0 @@
-Não tive tempo para construir a parte da ordenação externa pois não havia código nos slides e muito menos pseudocódigo, somente teoria.
-Também não tive tempo para aprender como se usa o Overleaf
-Consequentemente não fazia sentido gravar o video

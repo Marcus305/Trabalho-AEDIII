@@ -1,6 +1,8 @@
 package trabalho.classes;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 //Classe para manipular as contas de maneira indexada
@@ -8,7 +10,7 @@ public class Banco {
 
     public int gerarId() {
         int lastId;
-        try (RandomAccessFile raf = new RandomAccessFile("C:\\Users\\marcu\\IdeaProjects\\AEDIII_Trabalho\\Trabalho-AEDIII\\src\\trabalho\\output\\output0.txt", "r")) {
+        try (RandomAccessFile raf = new RandomAccessFile("src/trabalho/main/output/banco_de_dados.txt", "r")) {
             try {
                 lastId = raf.readInt();
             } catch (Exception e) {
@@ -25,7 +27,7 @@ public class Banco {
 
     //Verifica se já possui um determinado nome de usuário no banco
     public boolean checkUser(String test) {
-        try (RandomAccessFile raf = new RandomAccessFile("C:\\Users\\marcu\\IdeaProjects\\AEDIII_Trabalho\\Trabalho-AEDIII\\src\\trabalho\\output\\output0.txt", "r")) {
+        try (RandomAccessFile raf = new RandomAccessFile("src/trabalho/main/output/banco_de_dados.txt", "r")) {
             raf.readInt(); //last id
             do {
                 byte lapide = raf.readByte();
@@ -87,7 +89,8 @@ public class Banco {
 
     //Método somente para checar contas na memória secundária
     public void imprimir() {
-        try (RandomAccessFile raf = new RandomAccessFile("C:\\Users\\marcu\\IdeaProjects\\AEDIII_Trabalho\\Trabalho-AEDIII\\src\\trabalho\\output\\output0.txt", "r")) {
+        //File path = new File("src/trabalho/main/output/banco_de_dados.txt");
+        try (RandomAccessFile raf = new RandomAccessFile("src/trabalho/main/output/banco_de_dados.txt", "r")) {
             System.out.println("---------------------------------");
             raf.readInt(); //last id
             int i = 1;
@@ -151,7 +154,7 @@ public class Banco {
 
         if (check) {
             //atualiza no arquivo
-            try (RandomAccessFile raf = new RandomAccessFile("C:\\Users\\marcu\\IdeaProjects\\AEDIII_Trabalho\\Trabalho-AEDIII\\src\\trabalho\\output\\output0.txt", "rw")) {
+            try (RandomAccessFile raf = new RandomAccessFile("src/trabalho/main/output/banco_de_dados.txt", "rw")) {
                 //altera no arquivo a conta de débito
                 raf.seek(posDeb);
                 raf.readByte();
@@ -207,7 +210,7 @@ public class Banco {
     //Salva utilizando random accessfile para uma única contra no final do arquivo
     public long salvarRandom(Conta c, int id) {
         long pos = -1;
-        try(RandomAccessFile raf = new RandomAccessFile("C:\\Users\\marcu\\IdeaProjects\\AEDIII_Trabalho\\Trabalho-AEDIII\\src\\trabalho\\output\\output0.txt", "rw")) {
+        try(RandomAccessFile raf = new RandomAccessFile("src/trabalho/main/output/banco_de_dados.txt", "rw")) {
             raf.writeInt(id);
             raf.seek(raf.length());
             pos = raf.getFilePointer();
@@ -224,7 +227,7 @@ public class Banco {
 
     //pesquisa sequencial de registros
     public void pesquisarReg(Long pos) {
-        try (RandomAccessFile raf = new RandomAccessFile("C:\\Users\\marcu\\IdeaProjects\\AEDIII_Trabalho\\Trabalho-AEDIII\\src\\trabalho\\output\\output0.txt", "r")) {
+        try (RandomAccessFile raf = new RandomAccessFile("src/trabalho/main/output/banco_de_dados.txt", "r")) {
             boolean check = false;
             raf.seek(pos);
             byte lapide = raf.readByte();
@@ -263,7 +266,7 @@ public class Banco {
 
     //atualiza registro
     public void atualizarReg() {
-        try (RandomAccessFile raf = new RandomAccessFile("C:\\Users\\marcu\\IdeaProjects\\AEDIII_Trabalho\\Trabalho-AEDIII\\src\\trabalho\\output\\output0.txt", "rw")) {
+        try (RandomAccessFile raf = new RandomAccessFile("src/trabalho/main/output/banco_de_dados.txt", "rw")) {
             Scanner sc = new Scanner(System.in);
             System.out.println("Digite um id de usuário para atualizar registro:");
             int id = sc.nextInt();
@@ -363,7 +366,7 @@ public class Banco {
     }
 
     public void deletar() {
-        try (RandomAccessFile raf = new RandomAccessFile("C:\\Users\\marcu\\IdeaProjects\\AEDIII_Trabalho\\Trabalho-AEDIII\\src\\trabalho\\output\\output0.txt", "rw")) {
+        try (RandomAccessFile raf = new RandomAccessFile("src/trabalho/main/output/banco_de_dados.txt", "rw")) {
             Scanner sc = new Scanner(System.in);
             Index ind = new Index();
             System.out.println("Digite um id de usuário para deletar registro:");
@@ -403,6 +406,89 @@ public class Banco {
             //acha posição do registro
             //marca lápide
 
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void comprimir() throws IOException{
+        Lzw lzw = new Lzw();
+        Scanner sc = new Scanner(System.in);
+        String nomeArq;
+        System.out.println("Digite o nome do arquivo comprimido:");
+        nomeArq = sc.nextLine();
+        System.out.println("Informe a versão:");
+        nomeArq = nomeArq+"Compressao"+sc.nextLine();
+        nomeArq += ".lzw";
+
+        File base_dados = new File("src/trabalho/main/output/banco_de_dados.txt");
+        byte[] bytes = Files.readAllBytes(base_dados.toPath());
+
+        ArrayList<Integer> vet_codificado;
+
+        long tempoInicial = System.currentTimeMillis();
+        vet_codificado = lzw.cod_vet(bytes);
+        long tempoFinal = System.currentTimeMillis();
+
+        int[] arr = vet_codificado.stream().mapToInt(i -> i).toArray();
+        long arrTam = (long)arr.length * 32;
+
+        DataOutputStream dos;
+
+        try(FileOutputStream fos = new FileOutputStream("src/trabalho/main/output/"+nomeArq)) {
+            dos = new DataOutputStream(fos);
+            for (int j : arr) dos.writeInt(j);
+
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+        long bytesSize = Files.size(base_dados.toPath()) * 32;
+        double percent = 1-(double)(bytesSize/arrTam);
+
+        System.out.println("Tempo de execução: "+(tempoFinal-tempoInicial)+"ms | Porcentagem de ganho: "+(percent*100)+"%");
+    }
+
+    public void descomprimir() throws IOException{
+        Lzw lzw = new Lzw();
+        Scanner sc = new Scanner(System.in);
+        String nomeArq;
+        System.out.println("Digite o nome do arquivo para descomprimir:");
+        nomeArq = sc.nextLine();
+        System.out.println("Informe a versão:");
+        nomeArq = nomeArq+"Compressao"+sc.nextLine();
+        nomeArq += ".lzw";
+
+        DataInputStream dis;
+        ArrayList<Byte> vet_decod = new ArrayList<Byte>();
+
+        try(FileInputStream fis = new FileInputStream("src/trabalho/main/output/"+nomeArq)) {
+            dis = new DataInputStream(fis);
+            ArrayList<Integer> vet_cod = new ArrayList<Integer>();
+
+            while(true) {
+                try{
+                    vet_cod.add(dis.readInt());
+                } catch (EOFException fim) {
+                    dis.close();
+                    break;
+                }
+            }
+
+
+            vet_decod = lzw.decod_vet(vet_cod);
+
+
+
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+
+        try(RandomAccessFile raf = new RandomAccessFile("src/trabalho/main/output/banco_de_dados.txt", "rw")) {
+            raf.writeByte(vet_decod.get(0)); //last id
+
+            for(int i=1; i<vet_decod.size(); i++) {
+                raf.writeByte(vet_decod.get(i));
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

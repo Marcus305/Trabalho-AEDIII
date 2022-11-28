@@ -1,11 +1,12 @@
 package trabalho.classes;
 
+import java.io.File;
 import java.io.RandomAccessFile;
 
 public class Index {
 
     public void create(int id, long pos) {
-        try(RandomAccessFile raf = new RandomAccessFile("C:\\Users\\marcu\\IdeaProjects\\AEDIII_Trabalho\\Trabalho-AEDIII\\src\\trabalho\\output\\index0.txt", "rw")) {
+        try(RandomAccessFile raf = new RandomAccessFile("src/trabalho/main/output/index0.txt", "rw")) {
             int hash = this.hash(id);
             int key = hash*20;
             raf.seek(key);
@@ -51,7 +52,7 @@ public class Index {
     }
 
     public long read(int id) {
-        try(RandomAccessFile raf = new RandomAccessFile("C:\\Users\\marcu\\IdeaProjects\\AEDIII_Trabalho\\Trabalho-AEDIII\\src\\trabalho\\output\\index0.txt", "r")) {
+        try(RandomAccessFile raf = new RandomAccessFile("src/trabalho/main/output/index0.txt", "r")) {
             int hash = this.hash(id);
             int key = hash*20;
             raf.seek(key);
@@ -88,7 +89,7 @@ public class Index {
     }
 
     public void update(int id, long change) {
-        try(RandomAccessFile raf = new RandomAccessFile("C:\\Users\\marcu\\IdeaProjects\\AEDIII_Trabalho\\Trabalho-AEDIII\\src\\trabalho\\output\\index0.txt", "rw")) {
+        try(RandomAccessFile raf = new RandomAccessFile("src/trabalho/main/output/index0.txt", "rw")) {
             int hash = this.hash(id);
             int key = hash*20;
             raf.seek(key);
@@ -125,7 +126,7 @@ public class Index {
     }
 
     public void imprimir() {
-        try(RandomAccessFile raf = new RandomAccessFile("C:\\Users\\marcu\\IdeaProjects\\AEDIII_Trabalho\\Trabalho-AEDIII\\src\\trabalho\\output\\index0.txt", "r")) {
+        try(RandomAccessFile raf = new RandomAccessFile("src/trabalho/main/output/index0.txt", "r")) {
             System.out.println("PH    |    Id    |    Pos    |    Prox");
             for(int i=0; raf.getFilePointer() != raf.length(); i++) {
                 int key = i*20;
@@ -134,6 +135,21 @@ public class Index {
         } catch(Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public void imprimir2() {
+        String filePath = new File("").getAbsolutePath();
+        System.out.println(filePath);
+        //filePath.concat("path to the property file");
+        /*try(RandomAccessFile raf = new RandomAccessFile("C:\\Users\\marcu\\IdeaProjects\\AEDIII_Trabalho\\Trabalho-AEDIII\\src\\trabalho\\output\\index0.txt", "r")) {
+            System.out.println("PH    |    Id    |    Pos    |    Prox");
+            for(int i=0; raf.getFilePointer() != raf.length(); i++) {
+                int key = i*20;
+                System.out.println(key+"    |    "+raf.readInt()+"    |    "+raf.readLong()+"    |    "+raf.readLong());
+            }
+        } catch(Exception e) {
+            e.printStackTrace();
+        }*/
     }
 
 }
